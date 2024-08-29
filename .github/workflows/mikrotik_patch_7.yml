@@ -158,6 +158,16 @@ jobs:
         sudo -E python3 patch.py netinstall netinstall-cli
         sudo tar -czvf netinstall-$LATEST_VERSION.tar.gz ./netinstall-cli
 
+    - name: Get and Patch routeros-${{ env.LATEST_VERSION }}-arm.npk
+      run: |
+        sudo wget -nv -O routeros-$LATEST_VERSION-arm.npk https://download.mikrotik.com/routeros/$LATEST_VERSION/routeros-$LATEST_VERSION-arm.npk
+        sudo wget -nv -O routeros-$LATEST_VERSION-mmips.npk https://download.mikrotik.com/routeros/$LATEST_VERSION/routeros-$LATEST_VERSION-mmips.npk
+        sudo -E python3 patch.py npk routeros-$LATEST_VERSION-arm.npk
+        sudo -E python3 npk.py sign routeros-$LATEST_VERSION-arm.npk routeros-$LATEST_VERSION-arm.npk
+        sudo -E python3 patch.py npk routeros-$LATEST_VERSION-mmips.npk
+        sudo -E python3 npk.py sign routeros-$LATEST_VERSION-mmips.npk routeros-$LATEST_VERSION-mmips.npk
+
+
     - name: Cache mikrotik-${{ env.LATEST_VERSION }}${{ env.ARCH }}.iso
       if: steps.get_latest.outputs.has_new_version == 'true'
       id: cache-mikrotik
@@ -287,4 +297,6 @@ jobs:
           routeros-${{ env.LATEST_VERSION }}${{ env.ARCH }}.npk
           option-${{ env.LATEST_VERSION }}${{ env.ARCH }}.npk
           all_packages-*-${{ env.LATEST_VERSION }}.zip
+          routeros-${{ env.LATEST_VERSION }}-arm.npk
+          routeros-${{ env.LATEST_VERSION }}-mmips.npk
           *.EFI
