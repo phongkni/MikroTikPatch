@@ -187,20 +187,20 @@ jobs:
         sudo -E python3 patch.py npk calea-$LATEST_VERSION-arm.npk
         sudo -E python3 patch.py npk lora-$LATEST_VERSION-arm.npk
         
-        sudo -E python3 npk.py sign routeros-$LATEST_VERSION-arm.npk wifi-qcom-$LATEST_VERSION-arm.npk
-        sudo -E python3 npk.py sign routeros-$LATEST_VERSION-arm.npk rose-storage-$LATEST_VERSION-arm.npk
-        sudo -E python3 npk.py sign routeros-$LATEST_VERSION-arm.npk wifi-qcom-ac-$LATEST_VERSION-arm.npk
-        sudo -E python3 npk.py sign routeros-$LATEST_VERSION-arm.npk wireless-$LATEST_VERSION-arm.npk
-        sudo -E python3 npk.py sign routeros-$LATEST_VERSION-arm.npk dude-$LATEST_VERSION-arm.npk
-        sudo -E python3 npk.py sign routeros-$LATEST_VERSION-arm.npk zerotier-$LATEST_VERSION-arm.npk
-        sudo -E python3 npk.py sign routeros-$LATEST_VERSION-arm.npk iot-$LATEST_VERSION-arm.npk
-        sudo -E python3 npk.py sign routeros-$LATEST_VERSION-arm.npk user-manager-$LATEST_VERSION-arm.npk
-        sudo -E python3 npk.py sign routeros-$LATEST_VERSION-arm.npk tr069-client-$LATEST_VERSION-arm.npk
-        sudo -E python3 npk.py sign routeros-$LATEST_VERSION-arm.npk container-$LATEST_VERSION-arm.npk
-        sudo -E python3 npk.py sign routeros-$LATEST_VERSION-arm.npk ups-$LATEST_VERSION-arm.npk
-        sudo -E python3 npk.py sign routeros-$LATEST_VERSION-arm.npk gps-$LATEST_VERSION-arm.npk
-        sudo -E python3 npk.py sign routeros-$LATEST_VERSION-arm.npk calea-$LATEST_VERSION-arm.npk
-        sudo -E python3 npk.py sign routeros-$LATEST_VERSION-arm.npk lora-$LATEST_VERSION-arm.npk
+        sudo -E python3 npk.py sign wifi-qcom-$LATEST_VERSION-arm.npk wifi-qcom-$LATEST_VERSION-arm.npk
+        sudo -E python3 npk.py sign rose-storage-$LATEST_VERSION-arm.npk rose-storage-$LATEST_VERSION-arm.npk
+        sudo -E python3 npk.py sign wifi-qcom-ac-$LATEST_VERSION-arm.npk wifi-qcom-ac-$LATEST_VERSION-arm.npk
+        sudo -E python3 npk.py sign wireless-$LATEST_VERSION-arm.npk wireless-$LATEST_VERSION-arm.npk
+        sudo -E python3 npk.py sign dude-$LATEST_VERSION-arm.npk dude-$LATEST_VERSION-arm.npk
+        sudo -E python3 npk.py sign zerotier-$LATEST_VERSION-arm.npk zerotier-$LATEST_VERSION-arm.npk
+        sudo -E python3 npk.py sign iot-$LATEST_VERSION-arm.npk iot-$LATEST_VERSION-arm.npk
+        sudo -E python3 npk.py sign user-manager-$LATEST_VERSION-arm.npk user-manager-$LATEST_VERSION-arm.npk
+        sudo -E python3 npk.py sign tr069-client-$LATEST_VERSION-arm.npk tr069-client-$LATEST_VERSION-arm.npk
+        sudo -E python3 npk.py sign container-$LATEST_VERSION-arm.npk container-$LATEST_VERSION-arm.npk
+        sudo -E python3 npk.py sign ups-$LATEST_VERSION-arm.npk ups-$LATEST_VERSION-arm.npk
+        sudo -E python3 npk.py sign gps-$LATEST_VERSION-arm.npk gps-$LATEST_VERSION-arm.npk
+        sudo -E python3 npk.py sign calea-$LATEST_VERSION-arm.npk calea-$LATEST_VERSION-arm.npk
+        sudo -E python3 npk.py sign lora-$LATEST_VERSION-arm.npk lora-$LATEST_VERSION-arm.npk
         
         sudo zip all_packages-arm-$LATEST_VERSION.zip ./*-arm.npk
         
