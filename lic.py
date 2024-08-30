@@ -1,5 +1,8 @@
 from mikro import *
 
+MIKRO_LICENSE_HEADER = "-----BEGIN MIKROTIK SOFTWARE KEY-----"
+MIKRO_LICENSE_FOOTER = "-----END MIKROTIK SOFTWARE KEY-----"
+
 def mikro_get_sofware_id(mbr_random:bytes,hdd_serial:str,hdd_model:str,hdd_capacity_MB:int)->str:
     '''HDD Device'''
     assert(isinstance(mbr_random, bytes) and len(mbr_random) == 12 )
@@ -77,4 +80,3 @@ if __name__=='__main__':
         prase_license(args.lic, pub)
     else:
         parser.print_help()
-		
