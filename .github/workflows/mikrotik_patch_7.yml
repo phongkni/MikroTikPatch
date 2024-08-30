@@ -20,8 +20,8 @@ env:
   MIKRO_CLOUD_PUBLIC_KEY: ${{ secrets.MIKRO_CLOUD_PUBLIC_KEY }}
   MIKRO_LICENCE_URL: ${{ secrets.MIKRO_LICENCE_URL }}
   CUSTOM_LICENCE_URL: ${{ secrets.CUSTOM_LICENCE_URL }}
-  MIKRO_UPGRADE_URL: upgrade.mikrotik.com
-  CUSTOM_UPGRADE_URL: upgrade.mikrotik.com
+  MIKRO_UPGRADE_URL: ${{ secrets.MIKRO_UPGRADE_URL }}
+  CUSTOM_UPGRADE_URL: ${{ secrets.CUSTOM_UPGRADE_URL }}
   MIKRO_RENEW_URL: ${{ secrets.MIKRO_RENEW_URL }}
   CUSTOM_RENEW_URL: ${{ secrets.CUSTOM_RENEW_URL }}
   MIKRO_CLOUD_URL: ${{ secrets.MIKRO_CLOUD_URL }}
@@ -151,10 +151,10 @@ jobs:
       if: steps.get_latest.outputs.has_new_version == 'true' && matrix.arch == 'x86'
       run: |
         sudo unzip netinstall.zip
-        sudo -E python3 ./patch.py netinstall netinstall.exe
+        sudo -E python3 patch.py netinstall netinstall.exe
         sudo zip netinstall-$LATEST_VERSION.zip ./netinstall.exe
         sudo tar -xvf netinstall.tar.gz
-        sudo -E python3 ./patch.py netinstall netinstall-cli
+        sudo -E python3 patch.py netinstall netinstall-cli
         sudo tar -czvf netinstall-$LATEST_VERSION.tar.gz ./netinstall-cli
 
     - name: Cache mikrotik-${{ env.LATEST_VERSION }}${{ env.ARCH }}.iso
@@ -184,20 +184,20 @@ jobs:
         sudo umount ./iso
         sudo rm -rf ./iso
         sudo mv ./new_iso/routeros-$LATEST_VERSION$ARCH.npk ./
-        sudo -E python3 ./patch.py npk routeros-$LATEST_VERSION$ARCH.npk
+        sudo -E python3 patch.py npk routeros-$LATEST_VERSION$ARCH.npk
         NPK_FILES=$(find ./new_iso/*.npk)
         for file in $NPK_FILES; do
-            sudo -E python3 ./npk.py sign $file $file
+            sudo -E python3 npk.py sign $file $file
         done
         sudo cp routeros-$LATEST_VERSION$ARCH.npk ./new_iso/
-        sudo -E python3 ./npk.py create ./new_iso/gps-$LATEST_VERSION$ARCH.npk ./option-$LATEST_VERSION$ARCH.npk option ./option.sfs -desc="busybox"
+        sudo -E python3 npk.py create ./new_iso/gps-$LATEST_VERSION$ARCH.npk ./option-$LATEST_VERSION$ARCH.npk option ./option.sfs -desc="busybox"
         sudo cp option-$LATEST_VERSION$ARCH.npk ./new_iso/
-        sudo -E python3 ./npk.py create ./new_iso/gps-$LATEST_VERSION$ARCH.npk ./python3-$LATEST_VERSION$ARCH.npk python3 ./python3.sfs -desc="python 3.11.9"
+        sudo -E python3 npk.py create ./new_iso/gps-$LATEST_VERSION$ARCH.npk ./python3-$LATEST_VERSION$ARCH.npk python3 ./python3.sfs -desc="python 3.11.9"
         sudo cp python3-$LATEST_VERSION$ARCH.npk ./new_iso/
         sudo mkdir ./efiboot
         sudo mount -o loop ./new_iso/efiboot.img ./efiboot
         if [ "${{ matrix.arch }}" == "x86" ]; then
-          sudo -E python3 ./patch.py kernel ./efiboot/linux.x86_64
+          sudo -E python3 patch.py kernel ./efiboot/linux.x86_64
           sudo cp ./efiboot/linux.x86_64 ./BOOTX64.EFI
           sudo cp ./BOOTX64.EFI ./new_iso/isolinux/linux
           sudo umount ./efiboot
@@ -217,7 +217,7 @@ jobs:
                       -R -J \
                       ./new_iso
         elif [ "${{ matrix.arch }}" == "arm64" ]; then
-          sudo -E python3 ./patch.py kernel ./efiboot/EFI/BOOT/BOOTAA64.EFI
+          sudo -E python3 patch.py kernel ./efiboot/EFI/BOOT/BOOTAA64.EFI
           sudo umount ./efiboot
           sudo xorriso -as mkisofs -o mikrotik-$LATEST_VERSION$ARCH.iso \
                       -V "MikroTik $LATEST_VERSION ${{ matrix.arch }}" \
@@ -287,7 +287,93 @@ jobs:
         sudo zip install-image-$LATEST_VERSION.zip ./install-image-$LATEST_VERSION.img
         sudo rm ./install-image-$LATEST_VERSION.img
 
-    
+    - name: Cache chr-${{ env.LATEST_VERSION }}${{ env.ARCH }}.img.zip
+      if: steps.get_latest.outputs.has_new_version == 'true' && matrix.arch == 'arm64'
+      id: cache-chr-img
+      uses: actions/cache@v4
+      with:
+        path: |
+          chr.img
+        key: chr-${{ env.LATEST_VERSION }}-${{ matrix.arch }}.img
+
+    - name: Get chr-${{ env.LATEST_VERSION }}${{ env.ARCH }}.img
+      if: steps.get_latest.outputs.has_new_version == 'true' && steps.cache-chr-img.outputs.cache-hit != 'true' && matrix.arch == 'arm64'
+      run: |
+          sudo wget -nv -O chr.img.zip https://download.mikrotik.com/routeros/$LATEST_VERSION/chr-$LATEST_VERSION$ARCH.img.zip
+          sudo unzip chr.img.zip
+          sudo rm chr.img.zip
+          sudo mv chr-$LATEST_VERSION$ARCH.img chr.img
+
+    - name: Create chr-${{ env.LATEST_VERSION }}${{ env.ARCH }}.img
+      if: steps.get_latest.outputs.has_new_version == 'true'
+      run: |
+        sudo modprobe nbd
+        sudo apt-get install -y qemu-utils extlinux > /dev/null
+        truncate --size 128M chr-$LATEST_VERSION$ARCH.img
+        sgdisk --clear --set-alignment=2 \
+            --new=1::+32M --typecode=1:8300 --change-name=1:"RouterOS Boot" --attributes=1:set:2 \
+            --new=2::-0 --typecode=2:8300 --change-name=2:"RouterOS" \
+            --gpttombr=1:2 \
+            chr-$LATEST_VERSION$ARCH.img
+        dd if=chr-$LATEST_VERSION$ARCH.img of=pt.bin bs=1 count=66 skip=446
+        echo -e "\x80" | dd of=pt.bin  bs=1 count=1  conv=notrunc
+        sgdisk --mbrtogpt --clear --set-alignment=2 \
+            --new=1::+32M --typecode=1:8300 --change-name=1:"RouterOS Boot" --attributes=1:set:2 \
+            --new=2::-0 --typecode=2:8300 --change-name=2:"RouterOS" \
+            chr-$LATEST_VERSION$ARCH.img
+        dd if=mbr.bin of=chr-$LATEST_VERSION$ARCH.img  bs=1 count=446 conv=notrunc
+        dd if=pt.bin of=chr-$LATEST_VERSION$ARCH.img  bs=1 count=66 seek=446 conv=notrunc
+        sudo qemu-nbd -c /dev/nbd0 -f raw chr-$LATEST_VERSION$ARCH.img
+        sudo mkfs.vfat -n "Boot" /dev/nbd0p1
+        sudo mkfs.ext4 -F -L "RouterOS"  -m 0 /dev/nbd0p2
+        sudo mkdir -p ./img/{boot,routeros}
+        sudo mount /dev/nbd0p1 ./img/boot/
+        if [ "${{ matrix.arch }}" == "x86" ]; then
+          sudo mkdir -p  ./img/boot/{BOOT,EFI/BOOT}
+          sudo cp BOOTX64.EFI ./img/boot/EFI/BOOT/BOOTX64.EFI
+          sudo extlinux --install  -H 64 -S 32 ./img/boot/BOOT
+          echo -e "default system\nlabel system\n\tkernel /EFI/BOOT/BOOTX64.EFI\n\tappend load_ramdisk=1 root=/dev/ram0 quiet" > syslinux.cfg
+          sudo cp syslinux.cfg ./img/boot/BOOT/
+          sudo rm syslinux.cfg
+        elif [ "${{ matrix.arch }}" == "arm64" ]; then
+          sudo qemu-nbd -c /dev/nbd1 -f raw chr.img
+          sudo mkdir -p ./chr/boot
+          sudo mount /dev/nbd1p1 ./chr/boot/
+          sudo -E python3 patch.py kernel ./chr/boot/EFI/BOOT/BOOTAA64.EFI -O ./BOOTAA64.EFI 
+          sudo mkdir -p  ./img/boot/EFI/BOOT
+          sudo cp ./BOOTAA64.EFI ./img/boot/EFI/BOOT/BOOTAA64.EFI
+          sudo umount /dev/nbd1p1
+          sudo rm -rf ./chr
+          sudo qemu-nbd -d /dev/nbd1
+        fi
+        sudo umount /dev/nbd0p1
+        sudo mount  /dev/nbd0p2 ./img/routeros/
+        sudo mkdir -p ./img/routeros/{var/pdb/{system,option},boot,rw}
+        sudo cp ./all_packages/option-$LATEST_VERSION$ARCH.npk ./img/routeros/var/pdb/option/image
+        sudo cp ./all_packages/routeros-$LATEST_VERSION$ARCH.npk ./img/routeros/var/pdb/system/image
+        sudo umount /dev/nbd0p2
+        sudo rm -rf ./img
+        sudo qemu-nbd -d /dev/nbd0
+
+        sudo qemu-img convert -f raw -O qcow2 chr-$LATEST_VERSION$ARCH.img chr-$LATEST_VERSION$ARCH.qcow2
+        sudo qemu-img convert -f raw -O vmdk chr-$LATEST_VERSION$ARCH.img chr-$LATEST_VERSION$ARCH.vmdk
+        sudo qemu-img convert -f raw -O vpc chr-$LATEST_VERSION$ARCH.img chr-$LATEST_VERSION$ARCH.vhd
+        sudo qemu-img convert -f raw -O vhdx chr-$LATEST_VERSION$ARCH.img chr-$LATEST_VERSION$ARCH.vhdx
+        sudo qemu-img convert -f raw -O vdi chr-$LATEST_VERSION$ARCH.img chr-$LATEST_VERSION$ARCH.vdi
+
+        sudo zip chr-$LATEST_VERSION$ARCH.qcow2.zip chr-$LATEST_VERSION$ARCH.qcow2
+        sudo zip chr-$LATEST_VERSION$ARCH.vmdk.zip chr-$LATEST_VERSION$ARCH.vmdk
+        sudo zip chr-$LATEST_VERSION$ARCH.vhd.zip chr-$LATEST_VERSION$ARCH.vhd
+        sudo zip chr-$LATEST_VERSION$ARCH.vhdx.zip chr-$LATEST_VERSION$ARCH.vhdx
+        sudo zip chr-$LATEST_VERSION$ARCH.vdi.zip chr-$LATEST_VERSION$ARCH.vdi
+        sudo zip chr-$LATEST_VERSION$ARCH.img.zip chr-$LATEST_VERSION$ARCH.img
+
+        sudo rm chr-$LATEST_VERSION$ARCH.qcow2
+        sudo rm chr-$LATEST_VERSION$ARCH.vmdk
+        sudo rm chr-$LATEST_VERSION$ARCH.vhd
+        sudo rm chr-$LATEST_VERSION$ARCH.vhdx
+        sudo rm chr-$LATEST_VERSION$ARCH.vdi
+        sudo rm chr-$LATEST_VERSION$ARCH.img
 
     - name: Upload Files
       if: steps.get_latest.outputs.has_new_version == 'true'
