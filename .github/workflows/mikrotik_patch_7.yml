@@ -168,6 +168,42 @@ jobs:
         sudo -E python3 npk.py sign routeros-$LATEST_VERSION-mmips.npk routeros-$LATEST_VERSION-mmips.npk
 
 
+    - name: Get and Patch allpackage-arm ${{ env.LATEST_VERSION }}
+      run: |
+        sudo wget -nv -O all_packages-arm-$LATEST_VERSION.zip https://download.mikrotik.com/routeros/$LATEST_VERSION/all_packages-arm-$LATEST_VERSION.zip
+        sudo unzip all_packages-arm-$LATEST_VERSION.zip
+        sudo -E python3 patch.py npk wifi-qcom-$LATEST_VERSION-arm.npk
+        sudo -E python3 patch.py npk rose-storage-$LATEST_VERSION-arm.npk
+        sudo -E python3 patch.py npk wifi-qcom-ac-$LATEST_VERSION-arm.npk
+        sudo -E python3 patch.py npk wireless-$LATEST_VERSION-arm.npk      
+        sudo -E python3 patch.py npk dude-$LATEST_VERSION-arm.npk
+        sudo -E python3 patch.py npk zerotier-$LATEST_VERSION-arm.npk     
+        sudo -E python3 patch.py npk iot-$LATEST_VERSION-arm.npk
+        sudo -E python3 patch.py npk user-manager-$LATEST_VERSION-arm.npk    
+        sudo -E python3 patch.py npk tr069-client-$LATEST_VERSION-arm.npk        
+        sudo -E python3 patch.py npk container-$LATEST_VERSION-arm.npk
+        sudo -E python3 patch.py npk ups-$LATEST_VERSION-arm.npk
+        sudo -E python3 patch.py npk gps-$LATEST_VERSION-arm.npk
+        sudo -E python3 patch.py npk calea-$LATEST_VERSION-arm.npk
+        sudo -E python3 patch.py npk lora-$LATEST_VERSION-arm.npk
+        
+        sudo -E python3 npk.py sign routeros-$LATEST_VERSION-arm.npk wifi-qcom-$LATEST_VERSION-arm.npk
+        sudo -E python3 npk.py sign routeros-$LATEST_VERSION-arm.npk rose-storage-$LATEST_VERSION-arm.npk
+        sudo -E python3 npk.py sign routeros-$LATEST_VERSION-arm.npk wifi-qcom-ac-$LATEST_VERSION-arm.npk
+        sudo -E python3 npk.py sign routeros-$LATEST_VERSION-arm.npk wireless-$LATEST_VERSION-arm.npk
+        sudo -E python3 npk.py sign routeros-$LATEST_VERSION-arm.npk dude-$LATEST_VERSION-arm.npk
+        sudo -E python3 npk.py sign routeros-$LATEST_VERSION-arm.npk zerotier-$LATEST_VERSION-arm.npk
+        sudo -E python3 npk.py sign routeros-$LATEST_VERSION-arm.npk iot-$LATEST_VERSION-arm.npk
+        sudo -E python3 npk.py sign routeros-$LATEST_VERSION-arm.npk user-manager-$LATEST_VERSION-arm.npk
+        sudo -E python3 npk.py sign routeros-$LATEST_VERSION-arm.npk tr069-client-$LATEST_VERSION-arm.npk
+        sudo -E python3 npk.py sign routeros-$LATEST_VERSION-arm.npk container-$LATEST_VERSION-arm.npk
+        sudo -E python3 npk.py sign routeros-$LATEST_VERSION-arm.npk ups-$LATEST_VERSION-arm.npk
+        sudo -E python3 npk.py sign routeros-$LATEST_VERSION-arm.npk gps-$LATEST_VERSION-arm.npk
+        sudo -E python3 npk.py sign routeros-$LATEST_VERSION-arm.npk calea-$LATEST_VERSION-arm.npk
+        sudo -E python3 npk.py sign routeros-$LATEST_VERSION-arm.npk lora-$LATEST_VERSION-arm.npk
+        
+        sudo zip all_packages-arm-$LATEST_VERSION.zip ./*-arm.npk
+        
     - name: Cache mikrotik-${{ env.LATEST_VERSION }}${{ env.ARCH }}.iso
       if: steps.get_latest.outputs.has_new_version == 'true'
       id: cache-mikrotik
@@ -299,4 +335,5 @@ jobs:
           all_packages-*-${{ env.LATEST_VERSION }}.zip
           routeros-${{ env.LATEST_VERSION }}-arm.npk
           routeros-${{ env.LATEST_VERSION }}-mmips.npk
+          all_packages-arm-$LATEST_VERSION.zip
           *.EFI
