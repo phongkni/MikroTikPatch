@@ -19,9 +19,9 @@ env:
   MIKRO_NPK_SIGN_PUBLIC_LKEY: ${{ secrets.MIKRO_NPK_SIGN_PUBLIC_LKEY }}
   #MIKRO_CLOUD_PUBLIC_KEY: ${{ secrets.MIKRO_CLOUD_PUBLIC_KEY }}
   MIKRO_LICENCE_URL: licence.mikrotik.com
-  CUSTOM_LICENCE_URL: licence.mikrotik.com
+  CUSTOM_LICENCE_URL: ${{ secrets.CUSTOM_LICENCE_URL }}
   MIKRO_UPGRADE_URL: upgrade.mikrotik.com
-  CUSTOM_UPGRADE_URL: upgrade.mikrotik.com
+  CUSTOM_UPGRADE_URL: ${{ secrets.CUSTOM_UPGRADE_URL }}
   MIKRO_RENEW_URL: ${{ secrets.MIKRO_RENEW_URL }}
   CUSTOM_RENEW_URL: ${{ secrets.CUSTOM_RENEW_URL }}
   #MIKRO_CLOUD_URL: ${{ secrets.MIKRO_CLOUD_URL }}
