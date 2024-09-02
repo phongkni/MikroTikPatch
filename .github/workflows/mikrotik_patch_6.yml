@@ -43,7 +43,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        channel: [long-term,stable]
+        channel: [stable]
     env:
       TZ: 'Asia/Shanghai'
       LATEST_VERSION: ""
@@ -79,23 +79,6 @@ jobs:
         echo "BUILD_TIME=${BUILD_TIME}" >> $GITHUB_ENV
 
  
-    - name: Cache mikrotik-${{ env.LATEST_VERSION }}.iso
-      if: steps.get_latest.outputs.has_new_version == 'true'
-      id: cache-mikrotik
-      uses: actions/cache@v4
-      with:
-        path: |
-          mikrotik.iso
-        key: mikrotik-${{ env.LATEST_VERSION }}
-
-    - name: Get and Patch routeros-mmips-ARM
-      run: |
-        sudo wget -nv -O routeros-arm-6.49.17.npk https://download.mikrotik.com/routeros/6.49.17/routeros-arm-6.49.17.npk
-        sudo wget -nv -O routeros-mmips-6.49.17.npk https://download.mikrotik.com/routeros/6.49.17/routeros-mmips-6.49.17.npk
-        sudo -E python3 patch.py npk routeros-$LATEST_VERSION-arm.npk
-        sudo -E python3 npk.py sign routeros-$LATEST_VERSION-arm.npk routeros-$LATEST_VERSION-arm.npk
-        sudo -E python3 patch.py npk routeros-$LATEST_VERSION-mmips.npk
-        sudo -E python3 npk.py sign routeros-$LATEST_VERSION-mmips.npk routeros-$LATEST_VERSION-mmips.npk
 
 
     - name: Get netinstall ${{ env.LATEST_VERSION }}
