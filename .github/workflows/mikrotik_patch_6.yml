@@ -89,7 +89,7 @@ jobs:
       run: |
         sudo unzip netinstall.zip
         sudo -E python3 patch.py netinstall netinstall.exe
-        sudo zip netinstall-$LATEST_VERSION.zip ./netinstall.exe
+        sudo zip netinstall-6.49.17.zip ./netinstall.exe
 
 
     - name: Delete Release tag ${{ env.LATEST_VERSION }}
