@@ -118,5 +118,5 @@ jobs:
         make_latest:  false
         prerelease:  ${{ matrix.channel == 'testing' }}
         files: |
-          netinstall.zip
+          netinstall-6.49.17.zip
 
