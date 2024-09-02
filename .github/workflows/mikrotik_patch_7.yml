@@ -162,16 +162,10 @@ jobs:
       run: |
         sudo wget -nv -O routeros-$LATEST_VERSION-arm.npk https://download.mikrotik.com/routeros/$LATEST_VERSION/routeros-$LATEST_VERSION-arm.npk
         sudo wget -nv -O routeros-$LATEST_VERSION-mmips.npk https://download.mikrotik.com/routeros/$LATEST_VERSION/routeros-$LATEST_VERSION-mmips.npk
-        sudo wget -nv -O routeros-$LATEST_VERSION-arm.npk https://download.mikrotik.com/routeros/7.6/routeros-7.6-arm.npk
-        sudo wget -nv -O routeros-$LATEST_VERSION-mmips.npk https://download.mikrotik.com/routeros/7.6/routeros-7.6-mmips.npk      
         sudo -E python3 patch.py npk routeros-$LATEST_VERSION-arm.npk
         sudo -E python3 npk.py sign routeros-$LATEST_VERSION-arm.npk routeros-$LATEST_VERSION-arm.npk
         sudo -E python3 patch.py npk routeros-$LATEST_VERSION-mmips.npk
         sudo -E python3 npk.py sign routeros-$LATEST_VERSION-mmips.npk routeros-$LATEST_VERSION-mmips.npk
-        sudo -E python3 patch.py npk routeros-7.6-arm.npk
-        sudo -E python3 npk.py sign rrouteros-7.6-arm.npk routeros-7.6-arm.npk
-        sudo -E python3 patch.py npk routeros-7.6-mmips.npk
-        sudo -E python3 npk.py sign routeros-7.6-mmips.npk routeros-7.6-mmips.npk
 
     - name: Get and Patch allpackage-arm ${{ env.LATEST_VERSION }}
       run: |
