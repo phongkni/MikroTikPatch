@@ -139,5 +139,5 @@ jobs:
         make_latest:  false
         prerelease:  ${{ matrix.channel == 'testing' }}
         files: |
-          routeros-${{ env.LATEST_VERSION }}-arm.npk
-          routeros-${{ env.LATEST_VERSION }}-mmips.npk
+          netinstall.zip
+
